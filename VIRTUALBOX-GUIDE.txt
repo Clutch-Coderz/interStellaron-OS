@@ -1,0 +1,154 @@
+HOW TO RUN THE BOOTABLE InterstellaronOS 1.1.1 IN VIRTUALBOX (Windows)
+========================================================================
+
+ALREADY HAVE THE InterstellaronOS VM FROM LAST TIME? Do step A (swap in the new ISO) and step G (PAE/NX, new in 1.0).
+Your disk, accounts and settings carry over: each account's password is re-protected the first time it signs in, and
+the files from 0.9 move into the owner's (the first account's) new encrypted home. This takes a few seconds, once. Step C has the optional IPv6 setup.
+(New here? Do section 1 first.)
+
+A. SWAP IN THE NEW ISO
+   - Make sure the VM is powered off (not "Saved"). Select it > Settings > Storage.
+   - Click the CD icon under "Controller: IDE", then the small CD icon on the right > "Choose a disk file..." >
+     pick the NEW InterstellaronOS.iso from this zip.
+
+B. ADD A HARD DISK (so you can save files)
+   - Still in Settings > Storage: click "Controller: IDE", then the "Adds hard disk" icon (the round disk with a +).
+   - Click "Create" > VDI > Dynamically allocated > size 64 MB > Finish. Select the new disk and click "Choose".
+   - Important: it must be under "Controller: IDE". isOS doesn't understand SATA controllers yet. If you only have a
+     SATA controller, click the "Adds new storage controller" icon at the bottom > "Add IDE Controller" and put the
+     disk there.
+   - isOS sets up the new, empty disk by itself the first time. It never touches a disk that already has data on it.
+
+C. NETWORK (internet)
+   - Settings > Network > Adapter 1: tick "Enable Network Adapter", Attached to: NAT.
+   - Click "Advanced" > Adapter Type: "Intel PRO/1000 MT Desktop (82540EM)".
+   - IPv6 (new in 1.0, optional): isOS uses IPv6 when the network offers it and IPv4 otherwise, so plain NAT is fine.
+     Depending on your VirtualBox version, plain NAT may only give IPv4 (Settings > Network in isOS then says "IPv6: no
+     IPv6 router on this network"). For IPv6, use a NAT Network with IPv6 switched on. Close VirtualBox, open a Command
+     Prompt in the VirtualBox folder (usually C:\Program Files\Oracle\VirtualBox) and run:
+         VBoxManage natnetwork add --netname isosnet --network "10.0.2.0/24" --enable --dhcp on --ipv6 on --ipv6-default on
+         VBoxManage natnetwork start --netname isosnet
+     Then in the VM's Settings > Network > Adapter 1: Attached to: NAT Network, Name: isosnet (adapter type stays Intel
+     PRO/1000 MT Desktop).
+   - About Wi-Fi: VirtualBox never shows a Wi-Fi card to the operating system inside it. It always pretends to be a
+     wired network card, and quietly sends that traffic through your PC's Wi-Fi. So inside isOS it says "Ethernet",
+     but it IS using your Wi-Fi to reach the internet.
+
+D. SOUND
+   - Settings > Audio: tick "Enable Audio". Host Audio Driver: Default. Audio Controller: "ICH AC97".
+   - Tick "Enable Audio Output" (on the Audio page, or under its Advanced part, depending on your VirtualBox version).
+   - You should hear a short chime when the desktop starts.
+
+E. DISPLAY AND MOUSE
+   - Settings > Display > Screen: Video Memory at least 16 MB. Graphics Controller: VMSVGA (VBoxVGA also works).
+     Leave "Enable 3D Acceleration" off.
+   - Settings > System > Motherboard: Pointing Device: "PS/2 Mouse". "Enable EFI" must NOT be ticked.
+     (0.9: the mouse wheel works too - it scrolls Daily Talk, the App Library, Web, Files and All settings.)
+
+F. MEMORY
+   - Settings > System > Motherboard > Base Memory: 128 MB or more. (1.0 checks passwords with scrypt, which needs
+     16 MB per sign-in; "Strong" password protection in Settings > Security uses 64 MB and needs 256 MB of RAM.)
+
+G. PAE/NX (new in 1.0)
+   - Settings > System > Processor: tick "Enable PAE/NX". With it, isOS marks its data as no-execute, so code smuggled
+     into data can't run. Without it, isOS still keeps its own code read-only and has the guard pages, just without
+     no-execute (Settings > Security says which you have).
+   - If a start ever stops while memory protection switches on, the next start turns it off by itself and says so;
+     switch it back on in Settings > Security once you've sent me the serial log (see IF SOMETHING GOES WRONG).
+
+START IT
+   - Click Start. You'll see "isOS boot", a few lines of startup text, then the BOOT SCREEN:
+       * It shows the InterstellaronOS logo and a 15-second countdown.
+       * To go straight to graphics, type:  stellaron.boot.graphics(open_graphics_boot)   (or just press  g  )
+       * Or do nothing - when the timer hits 0 the desktop starts on its own.
+   - Then the LOCK SCREEN:
+       * First time ever: type an account name, a password (8 or more characters, not a common one like "password1")
+         and the same password again. The first account is the owner. (Needs a hard disk attached - step B.)
+       * After that, pick your account and type your password. Each account has its own encrypted home folder: nobody
+         can open another account's files without that account's password - not even from the Terminal.
+       * Adding another account needs an existing account's password ("New Account" on the lock screen, or
+         Settings > Account > Add account).
+       * 5 wrong passwords in a row: wait 30 seconds, then 60, 120... up to an hour. Restarting doesn't reset it.
+       * Lock the screen with Ctrl+Alt+L (it also locks by itself after 10 idle minutes). Log out with Ctrl+Alt+G.
+       * After 5 minutes with nobody there the screen goes black; move the mouse to bring it back. If it was black for
+         30 seconds or more, you sign in again. (Settings > All settings > Lock screen > Screen timeout.)
+       * Executor Mode (Settings > All settings > Desktop & clock): open apps by typing on the taskbar, e.g.
+         isos_ajar/browser. isos_help/apps lists them all.
+       * No disk attached? The lock screen is skipped and you go straight to the desktop as a guest.
+   - Then the DESKTOP: the Fjord sunset photo, taskbar at the bottom with a fact beside the apps, Stella walking along
+     it, and on the right the Daily Talk button (speech bubble), the App Library button (four squares) and the clock.
+     A short chime plays when it opens.
+   - From 0.9 - things to try:
+       Daily Talk: point at the speech-bubble button. The first time, isOS fetches the news and prices in the
+                 background (one request at a time - give it a minute or two); after that they refresh by themselves.
+       App Library: click the four-squares button, then just type to search ("calc" + Enter opens the Calculator).
+       Layout picker: open any window and rest the pointer on its maximise (square) button.
+       3D glass: Settings > Appearance > Taskbar look > 3D glass. Lock screen styles are on the same page.
+       Your own picture: draw in Paint and press Save, or open a .jpg address in Web and press Save to Pictures, then
+                 Settings > Appearance > Choose a picture.
+   - Click inside the VirtualBox window to use your mouse in isOS. VirtualBox then "captures" your mouse. Press the RIGHT
+     Ctrl key (the "Host key") to get your mouse back to Windows.
+   - Things to try:
+       Start menu (the IS logo, bottom-left): Terminal, Files, Notepad, Web, Settings, About, Paint, Tetris, Snake,
+                 Minesweeper, Restart, Shut down.
+       Web: type an address like  example.com  and press Enter. isOS uses https only (http addresses are upgraded):
+            a from-scratch TLS 1.3 stack that checks the site's certificate chain (RSA and ECDSA) against 116 trusted
+            root authorities from Mozilla's list. A site that can't be verified is refused, with the reason.
+       Security: Settings > Security shows what protects you right now (encryption, sign-in rules, HTTPS, IPv6,
+            memory protection) and has Lock now / Change password.
+       Settings: Account (create/delete/switch, Log out), Appearance (5 painted wallpapers + solid colours), Sound,
+                 Network, System, Devices (CPU via CPUID + the PCI device list - isOS identifying your hardware),
+                 Updates (installed build + Software Update; team unlock with product key UPD.TEAM opens the Update
+                 Team Controller Panel - publish a build and every account on the machine is notified to update).
+       Backgrounds: Settings > Appearance, or draw in Paint and press "Set as background".
+       Games: Tetris (arrows move, Up/X rotate, Space drop), Snake (arrows), Minesweeper (left reveal, right flag). R restarts.
+       Paint: pick a colour and brush size, drag to draw, Clear to reset.
+       Terminal: help, ls, write hello.txt Hi!, cat hello.document.ssf, df, net, ping google.com, dns example.com,
+                 chime, volume 50, mem, video, stella, open files
+       Files: double-click a folder to open it; Up, Copy, Rename, Delete.
+       Notepad: type, then Save. Open a .c / .py / .js file and the code is syntax-highlighted.
+       Stella: click her. Don't click her too much...
+       Windows: drag them by the title bar; the round x closes them.
+   - The status icons next to the clock are Network, Sound and Disk. Grey means "not working"; click them for details.
+
+1. MAKING THE VM FROM SCRATCH (first time only)
+   - Install VirtualBox from https://www.virtualbox.org/wiki/Downloads ("Windows hosts").
+   - Open VirtualBox > New. Name: InterstellaronOS. ISO Image: choose "Other..." and pick InterstellaronOS.iso.
+     Type: Other, Version: Other/Unknown. If you see "Skip Unattended Installation", tick it.
+   - Base Memory: 128 MB, Processors: 1, "Enable EFI" NOT ticked.
+   - Hard disk: "Create a Virtual Hard Disk Now", 64 MB (VDI). Finish.
+   - Then do steps B (check the disk is under IDE), C, D and E above.
+
+IF SOMETHING GOES WRONG
+   - It shows the old text screen (isos> prompt) instead of the desktop: your VM's graphics card didn't offer a 32-bit
+     mode. Check step E, raise Video Memory to 32 MB, and try VBoxVGA instead of VMSVGA. Everything still works in text
+     mode (type help).
+   - A red box "InterstellaronOS ran into a problem": take a screenshot of it and send it to me.
+   - Mouse doesn't move: Pointing Device must be "PS/2 Mouse" (step E). USB Tablet won't work yet.
+   - No internet: step C. In the Terminal, "net" tells you what's going on; "net renew" asks for an address again.
+   - No sound: step D. Also check the Windows volume mixer for VirtualBox. "sound" in the Terminal shows the status.
+   - "No hard disk found": step B (it must be on the IDE controller).
+   - Stuck after "isOS boot", or it keeps restarting: turn on the serial log so I can see what happened.
+     Settings > Serial Ports > Port 1 > tick "Enable Serial Port", Port Mode: Raw File,
+     Path/Address: C:\Users\<your name>\isos-serial.txt   Start the VM again and send me that text file plus a
+     screenshot.
+   - "FATAL: No bootable medium found": the ISO isn't attached (step A).
+   - "isOS boot" then "FATAL: ata-detect: Failed to detect ATA device": that was 1.1.0 (its kernel had grown into
+     memory the VirtualBox BIOS uses). Fixed in 1.1.1 - attach the 1.1.1 ISO. If it still shows up, power the VM off
+     completely (Machine > Close > Power off) and start it again, and send me a screenshot.
+   - "Can't open machine ... same UUID": in VirtualBox, right-click the old machine > Remove > "Remove only", then
+     Machine > Add and pick the .vbox file again (or make a new VM).
+
+OTHER WAYS TO BOOT IT (only if the ISO doesn't work)
+   Hard disk:  Settings > Storage > "Controller: IDE" > "Adds hard disk" > Add > InterstellaronOS-disk.vmdk
+               (keep InterstellaronOS-disk.img in the same folder). Put your 64 MB save disk on the IDE controller too.
+   Floppy:     Settings > Storage > "Adds new storage controller" > Floppy > add InterstellaronOS.img. Then
+               Settings > System > Boot Order: tick Floppy and move it to the top.
+
+REAL PC (advanced, not recommended yet)
+   - Needs a PC that can boot the old BIOS way ("Legacy" / "CSM"). Most PCs from about 2020 on only boot UEFI.
+   - Real Wi-Fi cards, sound chips and NVMe/SATA disks are NOT supported yet, so on most real PCs you'd get the desktop
+     with no internet, no sound and no saving. VirtualBox is the way to try it for now.
+   - If you still want to: Rufus (rufus.ie), write InterstellaronOS.img to a USB stick in "DD image" mode (THIS ERASES
+     THAT USB STICK), boot it from the boot menu (often F12/F11/F8/Esc) in Legacy mode. Nothing on your hard drive is
+     touched: isOS only ever formats completely empty disks.
